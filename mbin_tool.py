@@ -22,16 +22,17 @@ class MBinTool:
         root.rowconfigure(0, weight=1)
        
         self.tree_view = ttk.Treeview(self.mainframe)
-        self.tree_view['columns'] = ["file_name", "file_size", "offset","align","convert"]
+        self.tree_view['columns'] = ["id","file_name", "file_size", "offset","align","convert"]
 
         #self.tree_view.column("id",width = 100)
+        self.tree_view.column("id",width = 100)
         self.tree_view.column("file_name",width = 400)
         self.tree_view.column("file_size",width = 100)
         self.tree_view.column("offset",width = 100)
         self.tree_view.column("align",width = 100)
         self.tree_view.column("convert",width = 100)
 
-        #self.tree_view.heading("id",text = "序号")
+        self.tree_view.heading("id",text = "序号")
         self.tree_view.heading("file_name",text = "文件名")
         self.tree_view.heading("file_size",text = "文件大小")
         self.tree_view.heading("offset",text = "偏移地址")
@@ -60,7 +61,7 @@ class MBinTool:
         #self.add_botton = ttk.Button(self.mainframe, text="添加", command=self.openfile).grid(column=64, row=64, sticky=W)
 
         self.bin_list = []
-        self.file_num = 10
+        self.file_num = 0
         self.frames = []
         self.gAlloffset = 0
         self.gAllalign = 0
@@ -101,20 +102,21 @@ class MBinTool:
             time_value = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             offset_addr = "0x0000"
             print(self.bin_list)
+            self.file_num += 1 
             if(len(self.bin_list)>0):
-                if(int(self.bin_list[-1][4],16)>0):
-                    temp = int(self.bin_list[-1][2],16)%int(self.bin_list[-1][4],16)
+                if(int(self.bin_list[-1][5],16)>0):
+                    temp = int(self.bin_list[-1][3],16)%int(self.bin_list[-1][5],16)
                     if temp == 0 :
-                        self.offset_count = int(self.bin_list[-1][2],16) + int(self.bin_list[-1][3],16)
+                        self.offset_count = int(self.bin_list[-1][3],16) + int(self.bin_list[-1][4],16)
                     else:
-                        zero_num = int(self.bin_list[-1][4],16) - temp
-                        self.offset_count = int(self.bin_list[-1][2],16) + zero_num + int(self.bin_list[-1][3],16)
+                        zero_num = int(self.bin_list[-1][5],16) - temp
+                        self.offset_count = int(self.bin_list[-1][3],16) + zero_num + int(self.bin_list[-1][4],16)
                 else:
-                    self.offset_count = int(self.bin_list[-1][2],16)+int(self.bin_list[-1][3],16)
+                    self.offset_count = int(self.bin_list[-1][3],16)+int(self.bin_list[-1][4],16)
                 offset_addr = str(hex(self.offset_count))
-            self.bin_list.append([time_value, self.bottonfile, str(hex(os.path.getsize(self.bottonfile))), offset_addr, "0x0004", "y"])
+            self.bin_list.append([time_value, str(self.file_num), self.bottonfile, str(hex(os.path.getsize(self.bottonfile))), offset_addr, "0x0004", "y"])
             #self.tree_view.insert("",len(self.bin_list),text=str(len(self.bin_list)),values = (self.bottonfile, os.path.getsize(self.bottonfile), 0, 0, "y"))
-            self.tree_view.insert("",len(self.bin_list),text= time_value,values = (self.bottonfile, str(hex(os.path.getsize(self.bottonfile))), offset_addr, "0x0004", "y"))
+            self.tree_view.insert("",len(self.bin_list),text= time_value,values = (str(self.file_num),self.bottonfile, str(hex(os.path.getsize(self.bottonfile))), offset_addr, "0x0004", "y"))
             self.tree_view.update()
     def delete_all_bin_file(self):
         self.bin_list.clear()
@@ -122,6 +124,7 @@ class MBinTool:
         for item in x:
             self.tree_view.delete(item)
         self.offset_count = 0
+        self.file_num = 0
         print(self.bin_list)
     def delete_bin_file(self):
         self.bin_list.pop()
@@ -131,6 +134,7 @@ class MBinTool:
             item_last = item
         #self.offset_count = 0
         self.tree_view.delete(item_last)
+        self.file_num -= 1 
         print(self.bin_list)
 
     def set_cell_value(self, event): # 双击进入编辑状态
@@ -152,16 +156,16 @@ class MBinTool:
         ttk.Label(setting_window,text = "字节对齐").grid(column=4, row=0, sticky=W)
         ttk.Label(setting_window,text = "转换字节序").grid(column=8, row=0, sticky=W)
         offset_entry_text = StringVar()
-        offset_entry_text.set(item_text[2])
+        offset_entry_text.set(item_text[3])
         print(offset_entry_text)
         offset_entry = ttk.Entry(setting_window, textvariable=offset_entry_text)
         offset_entry.grid(column=0, row=1, sticky=W)
         align_entry_text = StringVar()
-        align_entry_text.set(item_text[3])
+        align_entry_text.set(item_text[4])
         align_entry = ttk.Entry(setting_window, textvariable=align_entry_text)
         align_entry.grid(column=4, row=1, sticky=W)
         convert_entry_text = StringVar()
-        convert_entry_text.set(item_text[4])
+        convert_entry_text.set(item_text[5])
         convert_entry = ttk.Entry(setting_window, textvariable=convert_entry_text)
         convert_entry.grid(column=8, row=1, sticky=W)
 
@@ -189,11 +193,12 @@ class MBinTool:
             for bin in self.bin_list:
                 if(item_text[0] in bin[1]):
                     bin[2] = item_text[1]
-                    bin[3] = offset
-                    bin[4] = align
-                    bin[5] = convert
+                    bin[3] = item_text[2]
+                    bin[4] = offset
+                    bin[5] = align
+                    bin[6] = convert
                     time_value = bin[0]
-            self.tree_view.item(item,text=time_value,values = (item_text[0],item_text[1],offset,align,convert))
+            self.tree_view.item(item,text=time_value,values = (item_text[0],item_text[1],item_text[2],offset,align,convert))
             print(self.bin_list)
                 
                 
