@@ -13,5 +13,5 @@ pip install pathlib
 # Generate an executable file
 ```
 pip install pyinstaller
-pyintsaller -F -w .\mbin_tool.py
+pyinstaller -F -w .\mbin_tool.py
 ```
