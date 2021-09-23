@@ -237,7 +237,7 @@ class MBinTool:
                     self.add_bin(self.dst_file,bin_it[2])
 
                 if(int(bin_it[5],16)>0):
-                    self.bin_set_align(self.dst_file, int(bin_it[5],16))
+                    self.bin_set_align(self.dst_file, int(bin_it[4],16), int(bin_it[5],16))
                     print("set offset", int(bin_it[5],16))
             else:
                 tkinter.messagebox.showinfo(title='error', message='请检查文件的偏移地址！')
