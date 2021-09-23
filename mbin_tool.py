@@ -105,7 +105,7 @@ class MBinTool:
             self.file_num += 1 
             if(len(self.bin_list)>0):
                 if(int(self.bin_list[-1][5],16)>0):
-                    temp = int(self.bin_list[-1][3],16)%int(self.bin_list[-1][5],16)
+                    temp = (int(self.bin_list[-1][3],16) + self.offset_count) %int(self.bin_list[-1][5],16)
                     if temp == 0 :
                         self.offset_count = int(self.bin_list[-1][3],16) + int(self.bin_list[-1][4],16)
                     else:
@@ -270,10 +270,10 @@ class MBinTool:
         for i in range(dst_zero_size):
             dst_bin.write(data)
         dst_bin.close()
-    def bin_set_align(self, src_file, align_num):
+    def bin_set_align(self, src_file, file_offset, align_num):
         bin_size = os.path.getsize(src_file)
         #print("algin size before:0x%x"%bin_size)
-        temp = bin_size%align_num
+        temp = (bin_size+file_offset)%align_num
         if temp == 0 :
             return
         zero_num = align_num - temp
